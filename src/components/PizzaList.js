@@ -1,19 +1,25 @@
 import {useSelector, useDispatch} from 'react-redux';
-import {selectAllPizzas} from '../store/pizzas/selectors';
-import {selectUser } from '../store/user/selectors';
+import {selectAllPizzas, selectPizzaById} from '../store/pizzas/selectors';
+import {selectUser} from '../store/user/selectors';
 import {toggleFavorites} from '../store/user/slice';
 import {selectFavoritePizzaNames} from '../store/selectors';
-
+import {useState} from 'react';
+ 
 export default function PizzaList() {
-    const allPizzas = useSelector(selectAllPizzas);
-    const user = useSelector(selectUser);
     const dispatch = useDispatch();
-    
+
+    const allPizzas = useSelector(selectAllPizzas);
+    // Local state being used to keep track of the UI selector
+    const [selectedId, setSelectedId] = useState(allPizzas[0].id);
+
+    const user = useSelector(selectUser);
+    const favoritePizzaList = useSelector(selectFavoritePizzaNames);
+    const selectedPizza = useSelector(selectPizzaById(selectedId));
+
     const getPizzaJSX = () => {
-        console.log('hi were in the function')
         return allPizzas.map((pizza) => {
             return (
-                <div>
+                <div key={pizza.id}>
                     <p>{pizza.name}</p>
                     <p>{pizza.description}</p>
                     {pizza.image ? <img src={pizza.image} alt={pizza.name} width={'300px'}/> : '' }
@@ -24,9 +30,6 @@ export default function PizzaList() {
         })
     }
 
-    // THIS NEEDS TO BE SELECTED FROM STATE
-    const favoritePizzaList = useSelector(selectFavoritePizzaNames);
-
     return (
       <div>
         <h1>Pizza Explorer</h1>
@@ -35,7 +38,18 @@ export default function PizzaList() {
         </p>
         <p>Your favorite pizzas are: {favoritePizzaList.join(', ')}</p>
         <hr />
-        {console.log('hi were in the component')}
+        <select value={selectedId} onChange={(event) => {setSelectedId(event.target.value)}}>
+            {allPizzas.map((pizza) => {
+                return (<option key={pizza.id}>
+                    {pizza.id}
+                </option>)
+            })}
+        </select>
+        <div>
+            The selected pizza is: {selectedPizza.name}
+        </div>
+
+        <hr />
         {getPizzaJSX()}
       </div>
     );
